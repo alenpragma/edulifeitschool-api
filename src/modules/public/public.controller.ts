@@ -10,3 +10,12 @@ export const getSiteSettingsController = asyncWrapper(async (req, res) => {
     data: settings,
   });
 });
+
+export const getGalleryController = asyncWrapper(async (req, res) => {
+  const gallery = await publicService.getGallery();
+
+  return successResponse(res, {
+    message: "Gallert retrived successfully",
+    data: gallery,
+  });
+});

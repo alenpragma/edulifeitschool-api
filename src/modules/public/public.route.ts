@@ -5,4 +5,6 @@ const router = Router();
 
 router.get("/site-settings", publicController.getSiteSettingsController);
 
+router.get("/gallery", publicController.getGalleryController);
+
 export default router;
