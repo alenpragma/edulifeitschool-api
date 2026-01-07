@@ -4,6 +4,7 @@ import config from "../../config/env";
 import { prisma } from "../../config/prisma";
 import ApiError from "../../utils/ApiError";
 import { ReorderInput } from "./gallery.type";
+import { Photo } from "../../generated/prisma/client";
 
 export const addItem = async (
   files: Record<string, Express.Multer.File[] | null>
@@ -29,7 +30,7 @@ export const addItem = async (
 export const getItems = async () => {
   const photos = await prisma.photo.findMany({ orderBy: { position: "asc" } });
 
-  return photos.map((photo) => ({
+  return photos.map((photo: Photo) => ({
     ...photo,
     url: `${config.BASE_URL}${photo.url}`,
   }));
