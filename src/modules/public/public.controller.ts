@@ -28,3 +28,12 @@ export const getTeachersController = asyncWrapper(async (req, res) => {
     data: teachers,
   });
 });
+
+export const getUpcomingEventsController = asyncWrapper(async (req, res) => {
+  const events = await publicService.getUpcomingEvents();
+
+  return successResponse(res, {
+    message: "Upcoming events retrived successfully",
+    data: events,
+  });
+});

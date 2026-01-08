@@ -9,4 +9,6 @@ router.get("/gallery", publicController.getGalleryController);
 
 router.get("/teachers", publicController.getTeachersController);
 
+router.get("/upcoming-events", publicController.getUpcomingEventsController);
+
 export default router;

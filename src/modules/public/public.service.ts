@@ -2,7 +2,7 @@ import path from "node:path";
 import { prisma } from "../../config/prisma";
 import config from "../../config/env";
 import { Photo, SiteSetting } from "../../generated/prisma/client";
-import { Teacher } from "../../generated/prisma/client";
+import { Teacher, Event } from "../../generated/prisma/client";
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -49,3 +49,22 @@ export const getTeachers = () =>
         : null,
     }))
   );
+
+export const getUpcomingEvents = () =>
+  prisma.event
+    .findMany({
+      where: {
+        date: {
+          gte: new Date(),
+        },
+      },
+      orderBy: {
+        date: "asc",
+      },
+    })
+    .then((events: Event[]) =>
+      events.map((e) => ({
+        ...e,
+        icon: e.icon ? `${config.BASE_URL}${e.icon}` : null,
+      }))
+    );
