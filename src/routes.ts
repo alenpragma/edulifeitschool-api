@@ -6,6 +6,7 @@ import galleryRoutes from "./modules/gallery/gallery.route";
 import teacherRoutes from "./modules/teacher/teacher.route";
 import eventRoutes from "./modules/event/event.route";
 import publicRoutes from "./modules/public/public.route";
+import contactFormRoutes from "./modules/contact-form/contact-form.route";
 import { authRequired } from "./middlewares/auth.middleware";
 
 const router = Router();
@@ -23,6 +24,8 @@ router.use("/admin/gallery", authRequired(), galleryRoutes);
 router.use("/admin/teachers", authRequired(), teacherRoutes);
 
 router.use("/admin/events", authRequired(), eventRoutes);
+
+router.use("/admin/contact-forms", authRequired(), contactFormRoutes);
 
 router.use("/", publicRoutes);
 

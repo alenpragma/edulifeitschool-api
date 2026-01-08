@@ -37,3 +37,12 @@ export const getUpcomingEventsController = asyncWrapper(async (req, res) => {
     data: events,
   });
 });
+
+export const addContactFormController = asyncWrapper(async (req, res) => {
+  await publicService.addContactForm(req.body);
+
+  return successResponse(res, {
+    status: 201,
+    message: "Submitted successfully. We will reach you soon!",
+  });
+});

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { prisma } from "../../config/prisma";
 import config from "../../config/env";
-import { Photo, SiteSetting } from "../../generated/prisma/client";
+import { ContactForm, Photo, SiteSetting } from "../../generated/prisma/client";
 import { Teacher, Event } from "../../generated/prisma/client";
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
@@ -68,3 +68,12 @@ export const getUpcomingEvents = () =>
         icon: e.icon ? `${config.BASE_URL}${e.icon}` : null,
       }))
     );
+
+export const addContactForm = ({
+  name,
+  phone,
+  email,
+  subject,
+  message,
+}: ContactForm) =>
+  prisma.contactForm.create({ data: { name, phone, email, subject, message } });

@@ -60,3 +60,15 @@ model Event {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ContactForm {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  email     String?
+  subject   String
+  message   String
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
