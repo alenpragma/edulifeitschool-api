@@ -19,3 +19,12 @@ export const getGalleryController = asyncWrapper(async (req, res) => {
     data: gallery,
   });
 });
+
+export const getTeachersController = asyncWrapper(async (req, res) => {
+  const teachers = await publicService.getTeachers();
+
+  return successResponse(res, {
+    message: "Teachers retrived successfully",
+    data: teachers,
+  });
+});

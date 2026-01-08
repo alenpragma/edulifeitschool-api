@@ -2,6 +2,7 @@ import path from "node:path";
 import { prisma } from "../../config/prisma";
 import config from "../../config/env";
 import { Photo, SiteSetting } from "../../generated/prisma/client";
+import { Teacher } from "../../generated/prisma/client";
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -38,3 +39,13 @@ export const getGallery = async () => {
     url: `${config.BASE_URL}${photo.url}`,
   }));
 };
+
+export const getTeachers = () =>
+  prisma.teacher.findMany().then((teachers: Teacher[]) =>
+    teachers.map((t) => ({
+      ...t,
+      profilePicture: t.profilePicture
+        ? `${config.BASE_URL}${t.profilePicture}`
+        : null,
+    }))
+  );
