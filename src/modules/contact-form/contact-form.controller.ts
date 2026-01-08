@@ -11,3 +11,9 @@ export const getPaginatedFormsController = asyncWrapper(async (req, res) => {
     meta,
   });
 });
+
+export const updateFormNoteController = asyncWrapper(async (req, res) => {
+  await contactFormService.updateFormNote(Number(req.params.id), req.body);
+
+  return successResponse(res, { message: "Form note updated!" });
+});
