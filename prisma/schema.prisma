@@ -44,7 +44,7 @@ model Teacher {
   id             Int      @id @default(autoincrement())
   name           String
   subject        String
-  qualification  String?
+  qualification  String
   profilePicture String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

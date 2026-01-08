@@ -73,5 +73,12 @@ export const deleteTeacher = async (id: number) => {
   const teacher = await prisma.teacher.findUnique({ where: { id } });
   if (!teacher) throw new Error("Teacher not found");
 
+  if (teacher.profilePicture) {
+    const filePath = path.join(process.cwd(), "public", teacher.profilePicture);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+
   return prisma.teacher.delete({ where: { id } });
 };
