@@ -14,7 +14,7 @@ enum UserRole {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           Int      @id @default(autoincrement())
   name         String
   email        String   @unique
   passwordHash String
@@ -51,14 +51,16 @@ model Teacher {
 }
 
 model Event {
-  id        Int      @id @default(autoincrement())
-  title     String
-  time      String
-  location  String
-  icon      String?
-  date      DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  time        String
+  location    String
+  icon        String?
+  date        DateTime
+  entryFee    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ContactForm {

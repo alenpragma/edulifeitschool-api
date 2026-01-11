@@ -16,7 +16,7 @@ export const loginController = asyncWrapper(
 
 export const meController = asyncWrapper(
   async (req: Request, res: Response) => {
-    const me = await authService.me(req.user.id);
+    const me = await authService.me(Number(req.user.id));
 
     return successResponse(res, {
       message: "Logged-in user retrived successfully",

@@ -3,6 +3,7 @@ import { prisma } from "../../config/prisma";
 import config from "../../config/env";
 import { ContactForm, Photo, SiteSetting } from "../../generated/prisma/client";
 import { Teacher, Event } from "../../generated/prisma/client";
+import ApiError from "../../utils/ApiError";
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -68,6 +69,18 @@ export const getUpcomingEvents = () =>
         icon: e.icon ? `${config.BASE_URL}${e.icon}` : null,
       }))
     );
+
+export const getEventById = async (id: string) => {
+  const event = await prisma.event.findUnique({
+    where: { id, date: { gte: new Date() } },
+  });
+  if (!event) throw new ApiError(404, "Event not found!");
+
+  return {
+    ...event,
+    icon: event.icon ? `${config.BASE_URL}${event.icon}` : null,
+  };
+};
 
 export const addContactForm = ({
   name,

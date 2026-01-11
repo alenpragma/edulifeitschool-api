@@ -3,4 +3,6 @@ export type AddEventInput = {
   time: string;
   location: string;
   date: string;
+  entryFee: number;
+  description?: string;
 };

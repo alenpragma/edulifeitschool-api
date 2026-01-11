@@ -4,6 +4,7 @@ import { prisma } from "../../config/prisma";
 import { AddTeacherInput } from "./teacher.type";
 import { Teacher } from "../../generated/prisma/client";
 import config from "../../config/env";
+import ApiError from "../../utils/ApiError";
 
 export const addTeacher = (
   { name, subject, qualification }: AddTeacherInput,
@@ -37,7 +38,7 @@ export const updateTeacher = async (
   file: Express.Multer.File | null
 ) => {
   const teacher = await prisma.teacher.findUnique({ where: { id } });
-  if (!teacher) throw new Error("Teacher not found");
+  if (!teacher) throw new ApiError(404, "Teacher not found!");
 
   let profilePicturePath = teacher.profilePicture;
 
@@ -71,7 +72,7 @@ export const updateTeacher = async (
 
 export const deleteTeacher = async (id: number) => {
   const teacher = await prisma.teacher.findUnique({ where: { id } });
-  if (!teacher) throw new Error("Teacher not found");
+  if (!teacher) throw new ApiError(404, "Teacher not found!");
 
   if (teacher.profilePicture) {
     const filePath = path.join(process.cwd(), "public", teacher.profilePicture);

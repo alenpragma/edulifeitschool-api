@@ -10,6 +10,14 @@ export const validateAddEvent = [
     .withMessage("Date is required")
     .isISO8601()
     .withMessage("Date must be a valid ISO 8601 date"),
+  body("entryFee")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Entry fee must be a positive integer"),
+  body("description")
+    .optional({ nullable: true })
+    .isString()
+    .withMessage("Description must be a string"),
   validator,
 ];
 
@@ -22,5 +30,13 @@ export const validateUpdateEvent = [
     .withMessage("Date is required")
     .isISO8601()
     .withMessage("Date must be a valid ISO 8601 date"),
+  body("entryFee")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Entry fee must be a positive integer"),
+  body("description")
+    .optional({ nullable: true })
+    .isString()
+    .withMessage("Description must be a string"),
   validator,
 ];

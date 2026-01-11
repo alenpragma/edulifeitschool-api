@@ -14,7 +14,7 @@ export default function initializePassport(passport: PassportStatic) {
   };
 
   passport.use(
-    new JwtStrategy(opts, async (jwt_payload: { id: string }, done) => {
+    new JwtStrategy(opts, async (jwt_payload: { id: number }, done) => {
       try {
         // Find user by id using Prisma
         const user = await prisma.user.findUnique({

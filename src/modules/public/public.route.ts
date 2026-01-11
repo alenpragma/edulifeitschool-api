@@ -12,6 +12,8 @@ router.get("/teachers", publicController.getTeachersController);
 
 router.get("/upcoming-events", publicController.getUpcomingEventsController);
 
+router.get("/upcoming-events/:id", publicController.getEventByIdController);
+
 router.post(
   "/contact-form",
   publicValidator.validateContactForm,

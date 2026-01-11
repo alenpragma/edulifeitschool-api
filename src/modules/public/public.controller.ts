@@ -38,6 +38,15 @@ export const getUpcomingEventsController = asyncWrapper(async (req, res) => {
   });
 });
 
+export const getEventByIdController = asyncWrapper(async (req, res) => {
+  const event = await publicService.getEventById(req.params.id);
+
+  return successResponse(res, {
+    message: "Event retrived successfully",
+    data: event,
+  });
+});
+
 export const addContactFormController = asyncWrapper(async (req, res) => {
   await publicService.addContactForm(req.body);
 

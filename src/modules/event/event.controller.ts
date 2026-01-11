@@ -13,17 +13,18 @@ export const addEventController = asyncWrapper(async (req, res) => {
 });
 
 export const getEventsController = asyncWrapper(async (req, res) => {
-  const events = await eventService.getEvents();
+  const { data, meta } = await eventService.getPaginatedEvents(req.query);
 
   return successResponse(res, {
     message: "Events retrieved successfully",
-    data: events,
+    data,
+    meta,
   });
 });
 
 export const updateEventController = asyncWrapper(async (req, res) => {
   const updatedEvent = await eventService.updateEvent(
-    Number(req.params.id),
+    req.params.id,
     req.body,
     req.file || null
   );
@@ -35,7 +36,7 @@ export const updateEventController = asyncWrapper(async (req, res) => {
 });
 
 export const deleteEventController = asyncWrapper(async (req, res) => {
-  await eventService.deleteEvent(Number(req.params.id));
+  await eventService.deleteEvent(req.params.id);
 
   return successResponse(res, {
     message: "Event deleted successfully",
