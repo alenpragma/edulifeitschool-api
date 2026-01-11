@@ -13,7 +13,8 @@ export const validateAddEvent = [
   body("entryFee")
     .optional()
     .isInt({ min: 0 })
-    .withMessage("Entry fee must be a positive integer"),
+    .withMessage("Entry fee must be a positive integer")
+    .toInt(),
   body("description")
     .optional({ nullable: true })
     .isString()
@@ -33,7 +34,8 @@ export const validateUpdateEvent = [
   body("entryFee")
     .optional()
     .isInt({ min: 0 })
-    .withMessage("Entry fee must be a positive integer"),
+    .withMessage("Entry fee must be a positive integer")
+    .toInt(),
   body("description")
     .optional({ nullable: true })
     .isString()

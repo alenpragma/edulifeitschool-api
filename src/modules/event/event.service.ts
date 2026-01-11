@@ -63,7 +63,7 @@ export const getPaginatedEvents = async ({
 
 export const updateEvent = async (
   id: string,
-  { title, time, location, date }: AddEventInput,
+  { title, time, location, date, description, entryFee }: AddEventInput,
   file: Express.Multer.File | null
 ) => {
   const event = await prisma.event.findUnique({ where: { id } });
@@ -92,6 +92,8 @@ export const updateEvent = async (
       location,
       date: new Date(date),
       icon: iconPath,
+      entryFee,
+      description,
     },
   });
 };
