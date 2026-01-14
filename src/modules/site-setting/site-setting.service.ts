@@ -66,7 +66,7 @@ export const getSiteSettings = async () => {
           s.key,
           {
             ...s.value,
-            heroImage: path.join(config.BASE_URL, s.value.heroImage),
+            heroImage: `${config.BASE_URL}${s.value.heroImage}`,
           },
         ];
       }
