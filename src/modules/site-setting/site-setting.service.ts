@@ -10,10 +10,11 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
 
 export const upsertSiteSetting = async (
   { key, value }: UpsertInput,
-  file: Express.Multer.File | null
+  file: Express.Multer.File | null,
 ) => {
   let updatedValue = value;
 
+  // Handle Hero Image
   if (key === "hero" && file) {
     const heroFile = file as Express.Multer.File & { publicPath: string };
 
@@ -28,7 +29,7 @@ export const upsertSiteSetting = async (
       const oldPath = path.join(
         process.cwd(),
         "public",
-        (oldSetting.value as Record<string, any>).heroImage
+        (oldSetting.value as Record<string, any>).heroImage,
       );
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -41,6 +42,39 @@ export const upsertSiteSetting = async (
       typeof value === "object" && !Array.isArray(value)
         ? { ...(value as Record<string, any>), heroImage: heroFile.publicPath }
         : { heroImage: heroFile.publicPath };
+  }
+
+  // Handle WhyChooseUs Banner Image
+  if (key === "whyChooseUs" && file) {
+    const bannerFile = file as Express.Multer.File & { publicPath: string };
+
+    const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
+
+    if (
+      oldSetting?.value &&
+      typeof oldSetting.value === "object" &&
+      !Array.isArray(oldSetting.value) &&
+      "bannerImage" in oldSetting.value
+    ) {
+      const oldPath = path.join(
+        process.cwd(),
+        "public",
+        (oldSetting.value as Record<string, any>).bannerImage,
+      );
+      try {
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      } catch (err) {
+        console.error("Failed to delete old banner image:", err);
+      }
+    }
+
+    updatedValue =
+      typeof value === "object" && !Array.isArray(value)
+        ? {
+            ...(value as Record<string, any>),
+            bannerImage: bannerFile.publicPath,
+          }
+        : { bannerImage: bannerFile.publicPath };
   }
 
   const upserted = await prisma.siteSetting.upsert({
@@ -57,6 +91,7 @@ export const getSiteSettings = async () => {
 
   return Object.fromEntries(
     settings.map((s: SiteSetting) => {
+      // Hero Image
       if (
         s.key === "hero" &&
         isObject(s.value) &&
@@ -71,7 +106,22 @@ export const getSiteSettings = async () => {
         ];
       }
 
+      // WhyChooseUs Banner Image
+      if (
+        s.key === "whyChooseUs" &&
+        isObject(s.value) &&
+        typeof s.value.bannerImage === "string"
+      ) {
+        return [
+          s.key,
+          {
+            ...s.value,
+            bannerImage: `${config.BASE_URL}${s.value.bannerImage}`,
+          },
+        ];
+      }
+
       return [s.key, s.value];
-    })
+    }),
   );
 };
