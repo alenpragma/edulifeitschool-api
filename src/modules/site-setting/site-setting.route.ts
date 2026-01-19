@@ -5,24 +5,21 @@ import { createDynamicUploader } from "../../middlewares/multer.middleware";
 
 const router = Router();
 const upload = createDynamicUploader((field) => {
-  switch (field) {
-    case "heroImage":
-      return { folder: "site-settings", filename: "hero-image" };
-    case "bannerImage":
-      return { folder: "site-settings", filename: "why-choose-us-banner" };
-    default:
-      return { folder: "others" };
+  if (field === "heroImage") {
+    return {
+      folder: "site-settings",
+      filename: "hero-image",
+    };
   }
+
+  return { folder: "others" };
 });
 
 router.post(
   "/",
-  upload.fields([
-    { name: "heroImage", maxCount: 1 },
-    { name: "bannerImage", maxCount: 1 },
-  ]),
+  upload.single("heroImage"),
   siteSettingValidator.validateUpsert,
-  siteSettingController.upsertSiteSettingController,
+  siteSettingController.upsertSiteSettingController
 );
 
 router.get("/", siteSettingController.getSiteSettingsController);

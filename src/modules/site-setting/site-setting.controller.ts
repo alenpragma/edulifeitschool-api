@@ -10,34 +10,21 @@ export const upsertSiteSettingController = asyncWrapper(
         ? JSON.parse(req.body.value)
         : req.body.value;
 
-    // Pick the correct file based on key
-    const files = req.files as Record<
-      string,
-      Express.Multer.File[] | undefined
-    >;
-    let file: Express.Multer.File | null = null;
-
-    if (req.body.key === "hero") {
-      file = files?.heroImage?.[0] || null;
-    } else if (req.body.key === "whyChooseUs") {
-      file = files?.bannerImage?.[0] || null;
-    }
-
     const upserted = await siteSettingService.upsertSiteSetting(
       { ...req.body, value: parsedValue },
-      file,
+      req.file || null
     );
 
     return successResponse(res, {
       message: "Site settings updated successfully",
       data: upserted,
     });
-  },
+  }
 );
 
 export const getSiteSettingsController = async (
   req: Request,
-  res: Response,
+  res: Response
 ) => {
   const settings = await siteSettingService.getSiteSettings();
 
