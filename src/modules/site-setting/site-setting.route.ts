@@ -17,8 +17,10 @@ const upload = createDynamicUploader((field) => {
 
 router.post(
   "/",
-  upload.single("heroImage"),
-  upload.single("bannerImage"),
+  upload.fields([
+    { name: "heroImage", maxCount: 1 },
+    { name: "bannerImage", maxCount: 1 },
+  ]),
   siteSettingValidator.validateUpsert,
   siteSettingController.upsertSiteSettingController,
 );
