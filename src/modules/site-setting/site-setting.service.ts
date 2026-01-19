@@ -8,75 +8,57 @@ import { SiteSetting } from "../../generated/prisma/client";
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
+/**
+ * Generic function to handle upsert of site settings.
+ * Supports image replacement for any key.
+ */
 export const upsertSiteSetting = async (
   { key, value }: UpsertInput,
   file: Express.Multer.File | null,
 ) => {
   let updatedValue = value;
 
-  // Handle Hero Image
-  if (key === "hero" && file) {
-    const heroFile = file as Express.Multer.File & { publicPath: string };
+  // Map keys to image fields
+  const imageFieldMap: Record<string, string> = {
+    hero: "heroImage",
+    whyChooseUs: "bannerImage",
+    // Add more image keys here if needed
+  };
 
+  const imageField = imageFieldMap[key];
+
+  if (imageField && file) {
+    const uploadedFile = file as Express.Multer.File & { publicPath: string };
+
+    // Find old setting to delete old image
     const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
 
     if (
       oldSetting?.value &&
-      typeof oldSetting.value === "object" &&
-      !Array.isArray(oldSetting.value) &&
-      "heroImage" in oldSetting.value
+      isObject(oldSetting.value) &&
+      imageField in oldSetting.value
     ) {
       const oldPath = path.join(
         process.cwd(),
         "public",
-        (oldSetting.value as Record<string, any>).heroImage,
+        (oldSetting.value as Record<string, any>)[imageField],
       );
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       } catch (err) {
-        console.error("Failed to delete old hero image:", err);
+        console.error(`Failed to delete old image (${imageField}):`, err);
       }
     }
 
-    updatedValue =
-      typeof value === "object" && !Array.isArray(value)
-        ? { ...(value as Record<string, any>), heroImage: heroFile.publicPath }
-        : { heroImage: heroFile.publicPath };
+    updatedValue = isObject(value)
+      ? {
+          ...(value as Record<string, any>),
+          [imageField]: uploadedFile.publicPath,
+        }
+      : { [imageField]: uploadedFile.publicPath };
   }
 
-  // Handle WhyChooseUs Banner Image
-  if (key === "whyChooseUs" && file) {
-    const bannerFile = file as Express.Multer.File & { publicPath: string };
-
-    const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
-
-    if (
-      oldSetting?.value &&
-      typeof oldSetting.value === "object" &&
-      !Array.isArray(oldSetting.value) &&
-      "bannerImage" in oldSetting.value
-    ) {
-      const oldPath = path.join(
-        process.cwd(),
-        "public",
-        (oldSetting.value as Record<string, any>).bannerImage,
-      );
-      try {
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      } catch (err) {
-        console.error("Failed to delete old banner image:", err);
-      }
-    }
-
-    updatedValue =
-      typeof value === "object" && !Array.isArray(value)
-        ? {
-            ...(value as Record<string, any>),
-            bannerImage: bannerFile.publicPath,
-          }
-        : { bannerImage: bannerFile.publicPath };
-  }
-
+  // Upsert setting
   const upserted = await prisma.siteSetting.upsert({
     where: { key },
     update: { value: updatedValue },
@@ -86,39 +68,26 @@ export const upsertSiteSetting = async (
   return upserted;
 };
 
+/**
+ * Fetch all site settings with proper image URLs
+ */
 export const getSiteSettings = async () => {
   const settings = await prisma.siteSetting.findMany();
 
   return Object.fromEntries(
     settings.map((s: SiteSetting) => {
-      // Hero Image
-      if (
-        s.key === "hero" &&
-        isObject(s.value) &&
-        typeof s.value.heroImage === "string"
-      ) {
-        return [
-          s.key,
-          {
-            ...s.value,
-            heroImage: `${config.BASE_URL}${s.value.heroImage}`,
-          },
-        ];
-      }
+      if (isObject(s.value)) {
+        const newValue = { ...s.value };
 
-      // WhyChooseUs Banner Image
-      if (
-        s.key === "whyChooseUs" &&
-        isObject(s.value) &&
-        typeof s.value.bannerImage === "string"
-      ) {
-        return [
-          s.key,
-          {
-            ...s.value,
-            bannerImage: `${config.BASE_URL}${s.value.bannerImage}`,
-          },
-        ];
+        // Prepend BASE_URL for known image fields
+        if (typeof newValue.heroImage === "string") {
+          newValue.heroImage = `${config.BASE_URL}${newValue.heroImage}`;
+        }
+        if (typeof newValue.bannerImage === "string") {
+          newValue.bannerImage = `${config.BASE_URL}${newValue.bannerImage}`;
+        }
+
+        return [s.key, newValue];
       }
 
       return [s.key, s.value];
