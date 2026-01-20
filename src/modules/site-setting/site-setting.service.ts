@@ -10,12 +10,14 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
 
 export const upsertSiteSetting = async (
   { key, value }: UpsertInput,
-  file: Express.Multer.File | null
+  files: Record<string, Express.Multer.File[]> | null,
 ) => {
   let updatedValue = value;
 
-  if (key === "hero" && file) {
-    const heroFile = file as Express.Multer.File & { publicPath: string };
+  if (key === "hero" && files && files["heroImage"]?.length) {
+    const heroFile = files["heroImage"][0] as Express.Multer.File & {
+      publicPath: string;
+    };
 
     const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
 
@@ -28,7 +30,7 @@ export const upsertSiteSetting = async (
       const oldPath = path.join(
         process.cwd(),
         "public",
-        (oldSetting.value as Record<string, any>).heroImage
+        (oldSetting.value as Record<string, any>).heroImage,
       );
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -72,6 +74,6 @@ export const getSiteSettings = async () => {
       }
 
       return [s.key, s.value];
-    })
+    }),
   );
 };

@@ -5,7 +5,7 @@ import { createDynamicUploader } from "../../middlewares/multer.middleware";
 
 const router = Router();
 const upload = createDynamicUploader((field) => {
-  if (field === "heroImage") {
+  if (field === "heroImage" || field === "bannerImage") {
     return {
       folder: "site-settings",
     };
@@ -16,7 +16,10 @@ const upload = createDynamicUploader((field) => {
 
 router.post(
   "/",
-  upload.single("heroImage"),
+  upload.fields([
+    { name: "heroImage", maxCount: 1 },
+    { name: "bannerImage", maxCount: 1 },
+  ]),
   siteSettingValidator.validateUpsert,
   siteSettingController.upsertSiteSettingController,
 );

@@ -12,19 +12,19 @@ export const upsertSiteSettingController = asyncWrapper(
 
     const upserted = await siteSettingService.upsertSiteSetting(
       { ...req.body, value: parsedValue },
-      req.file || null
+      req.files || null,
     );
 
     return successResponse(res, {
       message: "Site settings updated successfully",
       data: upserted,
     });
-  }
+  },
 );
 
 export const getSiteSettingsController = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   const settings = await siteSettingService.getSiteSettings();
 
