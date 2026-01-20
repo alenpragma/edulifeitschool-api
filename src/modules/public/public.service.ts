@@ -13,22 +13,32 @@ export const getSiteSettings = async () => {
 
   return Object.fromEntries(
     settings.map((s: SiteSetting) => {
-      if (
-        s.key === "hero" &&
-        isObject(s.value) &&
-        typeof s.value.heroImage === "string"
-      ) {
-        return [
-          s.key,
-          {
-            ...s.value,
-            heroImage: `${config.BASE_URL}${s.value.heroImage}`,
-          },
-        ];
+      if (isObject(s.value)) {
+        // Hero image
+        if (s.key === "hero" && typeof s.value.heroImage === "string") {
+          return [
+            s.key,
+            { ...s.value, heroImage: `${config.BASE_URL}${s.value.heroImage}` },
+          ];
+        }
+
+        // Banner image for whyChooseUs
+        if (
+          s.key === "whyChooseUs" &&
+          typeof s.value.bannerImage === "string"
+        ) {
+          return [
+            s.key,
+            {
+              ...s.value,
+              bannerImage: `${config.BASE_URL}${s.value.bannerImage}`,
+            },
+          ];
+        }
       }
 
       return [s.key, s.value];
-    })
+    }),
   );
 };
 
@@ -48,7 +58,7 @@ export const getTeachers = () =>
       profilePicture: t.profilePicture
         ? `${config.BASE_URL}${t.profilePicture}`
         : null,
-    }))
+    })),
   );
 
 export const getUpcomingEvents = () =>
@@ -67,7 +77,7 @@ export const getUpcomingEvents = () =>
       events.map((e) => ({
         ...e,
         icon: e.icon ? `${config.BASE_URL}${e.icon}` : null,
-      }))
+      })),
     );
 
 export const getEventById = async (id: string) => {
