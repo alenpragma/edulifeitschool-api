@@ -45,6 +45,40 @@ export const upsertSiteSetting = async (
         : { heroImage: heroFile.publicPath };
   }
 
+  if (key === "whyChooseUs" && files && files["bannerImage"]?.length) {
+    const bannerFile = files["bannerImage"][0] as Express.Multer.File & {
+      publicPath: string;
+    };
+
+    const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
+
+    if (
+      oldSetting?.value &&
+      typeof oldSetting.value === "object" &&
+      !Array.isArray(oldSetting.value) &&
+      "bannerImage" in oldSetting.value
+    ) {
+      const oldPath = path.join(
+        process.cwd(),
+        "public",
+        (oldSetting.value as Record<string, any>).bannerImage,
+      );
+      try {
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      } catch (err) {
+        console.error("Failed to delete old banner image:", err);
+      }
+    }
+
+    updatedValue =
+      typeof value === "object" && !Array.isArray(value)
+        ? {
+            ...(value as Record<string, any>),
+            bannerImage: bannerFile.publicPath,
+          }
+        : { bannerImage: bannerFile.publicPath };
+  }
+
   const upserted = await prisma.siteSetting.upsert({
     where: { key },
     update: { value: updatedValue },
