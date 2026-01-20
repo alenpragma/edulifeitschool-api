@@ -93,6 +93,7 @@ export const getSiteSettings = async () => {
 
   return Object.fromEntries(
     settings.map((s: SiteSetting) => {
+      // Hero image
       if (
         s.key === "hero" &&
         isObject(s.value) &&
@@ -103,6 +104,21 @@ export const getSiteSettings = async () => {
           {
             ...s.value,
             heroImage: `${config.BASE_URL}${s.value.heroImage}`,
+          },
+        ];
+      }
+
+      // Banner image for whyChooseUs
+      if (
+        s.key === "whyChooseUs" &&
+        isObject(s.value) &&
+        typeof s.value.bannerImage === "string"
+      ) {
+        return [
+          s.key,
+          {
+            ...s.value,
+            bannerImage: `${config.BASE_URL}${s.value.bannerImage}`,
           },
         ];
       }
