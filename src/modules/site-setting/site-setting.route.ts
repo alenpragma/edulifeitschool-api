@@ -8,7 +8,6 @@ const upload = createDynamicUploader((field) => {
   if (field === "heroImage") {
     return {
       folder: "site-settings",
-      filename: "hero-image",
     };
   }
 
@@ -19,7 +18,7 @@ router.post(
   "/",
   upload.single("heroImage"),
   siteSettingValidator.validateUpsert,
-  siteSettingController.upsertSiteSettingController
+  siteSettingController.upsertSiteSettingController,
 );
 
 router.get("/", siteSettingController.getSiteSettingsController);
