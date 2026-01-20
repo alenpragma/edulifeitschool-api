@@ -12,25 +12,34 @@ export const upsertSiteSetting = async (
   { key, value }: UpsertInput,
   files: Record<string, Express.Multer.File[]> | null,
 ) => {
-  let updatedValue = value;
+  // Fetch existing setting first
+  const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
 
-  if (key === "hero" && files && files["heroImage"]?.length) {
+  // Start with existing value if it's an object, else empty object
+  let updatedValue: Record<string, any> =
+    oldSetting?.value &&
+    typeof oldSetting.value === "object" &&
+    !Array.isArray(oldSetting.value)
+      ? { ...oldSetting.value }
+      : {};
+
+  // Merge new input
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    updatedValue = { ...updatedValue, ...value };
+  }
+
+  // Handle hero image
+  if (key === "hero" && files?.heroImage?.length) {
     const heroFile = files["heroImage"][0] as Express.Multer.File & {
       publicPath: string;
     };
 
-    const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
-
-    if (
-      oldSetting?.value &&
-      typeof oldSetting.value === "object" &&
-      !Array.isArray(oldSetting.value) &&
-      "heroImage" in oldSetting.value
-    ) {
+    // Delete old hero image if exists
+    if (updatedValue.heroImage) {
       const oldPath = path.join(
         process.cwd(),
         "public",
-        (oldSetting.value as Record<string, any>).heroImage,
+        updatedValue.heroImage,
       );
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -39,29 +48,21 @@ export const upsertSiteSetting = async (
       }
     }
 
-    updatedValue =
-      typeof value === "object" && !Array.isArray(value)
-        ? { ...(value as Record<string, any>), heroImage: heroFile.publicPath }
-        : { heroImage: heroFile.publicPath };
+    updatedValue.heroImage = heroFile.publicPath;
   }
 
-  if (key === "whyChooseUs" && files && files["bannerImage"]?.length) {
+  // Handle banner image
+  if (key === "whyChooseUs" && files?.bannerImage?.length) {
     const bannerFile = files["bannerImage"][0] as Express.Multer.File & {
       publicPath: string;
     };
 
-    const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
-
-    if (
-      oldSetting?.value &&
-      typeof oldSetting.value === "object" &&
-      !Array.isArray(oldSetting.value) &&
-      "bannerImage" in oldSetting.value
-    ) {
+    // Delete old banner image if exists
+    if (updatedValue.bannerImage) {
       const oldPath = path.join(
         process.cwd(),
         "public",
-        (oldSetting.value as Record<string, any>).bannerImage,
+        updatedValue.bannerImage,
       );
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -70,13 +71,7 @@ export const upsertSiteSetting = async (
       }
     }
 
-    updatedValue =
-      typeof value === "object" && !Array.isArray(value)
-        ? {
-            ...(value as Record<string, any>),
-            bannerImage: bannerFile.publicPath,
-          }
-        : { bannerImage: bannerFile.publicPath };
+    updatedValue.bannerImage = bannerFile.publicPath;
   }
 
   const upserted = await prisma.siteSetting.upsert({
