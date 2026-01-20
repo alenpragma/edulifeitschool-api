@@ -14,7 +14,7 @@ import initializePassport from "./utils/passport";
 import routes from "./routes";
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 
 // -- Winston config --
 const logger = winston.createLogger({
