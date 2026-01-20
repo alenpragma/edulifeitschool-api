@@ -14,13 +14,14 @@ import initializePassport from "./utils/passport";
 import routes from "./routes";
 
 const app = express();
+app.use(cors());
 
 // -- Winston config --
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.json()
+    winston.format.json(),
   ),
   transports: [
     new winston.transports.File({ filename: "logs/error.log", level: "error" }),
@@ -32,7 +33,6 @@ const logger = winston.createLogger({
 app.use(express.static(path.join(process.cwd(), "public")));
 
 // -- Global middlewares --
-app.use(cors({ origin: true, credentials: true }));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,7 +42,7 @@ initializePassport(passport);
 
 // HTTP logging
 app.use(
-  morgan("combined", { stream: { write: (msg) => logger.info(msg.trim()) } })
+  morgan("combined", { stream: { write: (msg) => logger.info(msg.trim()) } }),
 );
 
 // Console logging for dev
@@ -50,7 +50,7 @@ if (config.NODE_ENV !== "production") {
   logger.add(
     new winston.transports.Console({
       format: winston.format.simple(),
-    })
+    }),
   );
 }
 
