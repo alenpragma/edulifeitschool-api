@@ -16,7 +16,7 @@ export const upsertSiteSetting = async (
 
   let updatedValue: any = oldSetting?.value ?? null;
 
-  // Merge objects, replace everything else
+  // Merge objects, replace arrays/primitives
   if (
     value &&
     typeof value === "object" &&
@@ -30,27 +30,22 @@ export const upsertSiteSetting = async (
     updatedValue = value;
   }
 
-  // Ensure we have an object before image logic
-  if (
-    !updatedValue ||
-    typeof updatedValue !== "object" ||
-    Array.isArray(updatedValue)
-  ) {
-    updatedValue = {};
-  }
+  // 👉 Only create an object view for image logic
+  const obj =
+    updatedValue &&
+    typeof updatedValue === "object" &&
+    !Array.isArray(updatedValue)
+      ? updatedValue
+      : null;
 
   // Handle hero image
-  if (key === "hero" && files?.heroImage?.length) {
+  if (key === "hero" && obj && files?.heroImage?.length) {
     const heroFile = files["heroImage"][0] as Express.Multer.File & {
       publicPath: string;
     };
 
-    if (updatedValue.heroImage) {
-      const oldPath = path.join(
-        process.cwd(),
-        "public",
-        updatedValue.heroImage,
-      );
+    if (obj.heroImage) {
+      const oldPath = path.join(process.cwd(), "public", obj.heroImage);
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       } catch (err) {
@@ -58,21 +53,17 @@ export const upsertSiteSetting = async (
       }
     }
 
-    updatedValue.heroImage = heroFile.publicPath;
+    obj.heroImage = heroFile.publicPath;
   }
 
   // Handle banner image
-  if (key === "whyChooseUs" && files?.bannerImage?.length) {
+  if (key === "whyChooseUs" && obj && files?.bannerImage?.length) {
     const bannerFile = files["bannerImage"][0] as Express.Multer.File & {
       publicPath: string;
     };
 
-    if (updatedValue.bannerImage) {
-      const oldPath = path.join(
-        process.cwd(),
-        "public",
-        updatedValue.bannerImage,
-      );
+    if (obj.bannerImage) {
+      const oldPath = path.join(process.cwd(), "public", obj.bannerImage);
       try {
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       } catch (err) {
@@ -80,7 +71,7 @@ export const upsertSiteSetting = async (
       }
     }
 
-    updatedValue.bannerImage = bannerFile.publicPath;
+    obj.bannerImage = bannerFile.publicPath;
   }
 
   const upserted = await prisma.siteSetting.upsert({
