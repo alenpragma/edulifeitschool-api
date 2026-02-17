@@ -12,20 +12,31 @@ export const upsertSiteSetting = async (
   { key, value }: UpsertInput,
   files: Record<string, Express.Multer.File[]> | null,
 ) => {
-  // Fetch existing setting first
   const oldSetting = await prisma.siteSetting.findUnique({ where: { key } });
 
-  // Start with existing value if it's an object, else empty object
-  let updatedValue: Record<string, any> =
-    oldSetting?.value &&
-    typeof oldSetting.value === "object" &&
-    !Array.isArray(oldSetting.value)
-      ? { ...oldSetting.value }
-      : {};
+  let updatedValue: any = oldSetting?.value ?? null;
 
-  // Merge new input
-  if (value && typeof value === "object" && !Array.isArray(value)) {
+  // Merge objects, replace everything else
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    updatedValue &&
+    typeof updatedValue === "object" &&
+    !Array.isArray(updatedValue)
+  ) {
     updatedValue = { ...updatedValue, ...value };
+  } else if (value !== undefined) {
+    updatedValue = value;
+  }
+
+  // Ensure we have an object before image logic
+  if (
+    !updatedValue ||
+    typeof updatedValue !== "object" ||
+    Array.isArray(updatedValue)
+  ) {
+    updatedValue = {};
   }
 
   // Handle hero image
@@ -34,7 +45,6 @@ export const upsertSiteSetting = async (
       publicPath: string;
     };
 
-    // Delete old hero image if exists
     if (updatedValue.heroImage) {
       const oldPath = path.join(
         process.cwd(),
@@ -57,7 +67,6 @@ export const upsertSiteSetting = async (
       publicPath: string;
     };
 
-    // Delete old banner image if exists
     if (updatedValue.bannerImage) {
       const oldPath = path.join(
         process.cwd(),
